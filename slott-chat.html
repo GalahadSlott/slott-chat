@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slott-斯洛特 | 实时聊天软件</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Roboto', Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #0a0e14;
+            color: #e6e6e6;
+            line-height: 1.6;
+            overflow-x: hidden;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .app-container {
+            width: 100%;
+            max-width: 1200px;
+            height: 90vh;
+            background: linear-gradient(145deg, #1a1f29, #10151e);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            display: flex;
+        }
+        
+        /* 登录页面样式 */
+        .login-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: radial-gradient(circle at center, #1a1f29 0%, #0a0e14 100%);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .logo h1 {
+            font-size: 32px;
+            font-weight: 700;
+            background: linear-gradient(90deg, #4d5bce 0%, #38bdf8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-left: 15px;
+        }
+        
+        .impossible-triangle {
+            width: 50px;
+            height: 50px;
+        }
+        
+        .login-form {
+            background: rgba(26, 31, 41, 0.8);
+            padding: 30px;
+            border-radius: 15px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 24px;
+            color: #e6e6e6;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #a0aec0;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 1px solid #2a3343;
+            border-radius: 8px;
+            background-color: #10151e;
+            color: #e6e6e6;
+            font-size: 16px;
+        }
+        
+        .form-group input:focus {
+            outline: none;
+            border-color: #4d5bce;
+        }
+        
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background: linear-gradient(90deg, #4d5bce 0%, #38bdf8 100%);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(56, 189, 248, 0.3);
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: #a0aec0;
+        }
+        
+        .form-footer a {
+            color: #38bdf8;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        /* 聊天界面样式 */
+        .chat-container {
+            display: none;
+            width: 100%;
+            height: 100%;
+            flex-direction: column;
+        }
+        
+        .chat-header {
+            padding: 15px 20px;
+            background: linear-gradient(90deg, #0a0e14 0%, #1a1f29 100%);
+            border-bottom: 1px solid #2a3343;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .chat-title {
+            display: flex;
+            align-items: center;
+        }
+        
+        .online-dot {
+            width: 10px;
+            height: 10px;
+            background-color: #48bb78;
+            border-radius: 50%;
+            margin-right: 10px;
+        }
+        
+        .chat-actions button {
+            background: none;
+            border: none;
+            color: #a0aec0;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 15px;
+        }
+        
+        .chat-actions button:hover {
+            color: #38bdf8;
+        }
+        
+        .chat-main {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+        
+        .sidebar {
+            width: 250px;
+            background: #10151e;
+            border-right: 1px solid #2a3343;
+            padding: 15px;
+            overflow-y: auto;
+        }
+        
+        .sidebar-title {
+            color: #a0aec0;
+            margin-bottom: 15px;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .user-list, .group-list {
+            list-style: none;
+            margin-bottom: 25px;
+        }
+        
+        .user-item, .group-item {
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+        }
+        
+        .user-item:hover, .group-item:hover {
+            background: rgba(56, 189, 248, 0.1);
+        }
+        
+        .user-item.active, .group-item.active {
+            background: rgba(56, 189, 248, 0.2);
+        }
+        
+        .user-avatar, .group-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #4d5bce 0%, #38bdf8 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 10px;
+            font-size: 14px;
+        }
+        
+        .chat-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .message {
+            max-width: 70%;
+            padding: 12px 15px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+            position: relative;
+        }
+        
+        .message-incoming {
+            align-self: flex-start;
+            background: #2a3343;
+            border-top-left-radius: 5px;
+        }
+        
+        .message-outgoing {
+            align-self: flex-end;
+            background: linear-gradient(90deg, #4d5bce 0%, #38bdf8 100%);
+            border-top-right-radius: 5px;
+        }
+        
+        .message-sender {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .message-time {
+            font-size: 12px;
+            color: #a0aec0;
+            text-align: right;
+            margin-top: 5px;
+        }
+        
+        .message-input {
+            padding: 15px;
+            border-top: 1px solid #2a3343;
+            display: flex;
+            align-items: center;
+        }
+        
+        .message-input input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #2a3343;
+            border-radius: 25px;
+            background-color: #10151e;
+            color: #e6e6e6;
+            font-size: 16px;
+        }
+        
+        .message-input input:focus {
+            outline: none;
+            border-color: #4d5bce;
+        }
+        
+        .send-button {
+            background: linear-gradient(90deg, #4d5bce 0%, #38bdf8 100%);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-left: 10px;
+            color: white;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .app-container {
+                height: 100vh;
+                border-radius: 0;
+            }
+            
+            .sidebar {
+                width: 70px;
+            }
+            
+            .user-name, .group-name {
+                display: none;
+            }
+        }
+        
+        /* 通知样式 */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            background: #48bb78;
+            color: white;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #f56565;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            font-size: 12px;
+            color: #a0aec0;
+            margin-top: 10px;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            margin-right: 5px;
+        }
+        
+        .status-connected {
+            background-color: #48bb78;
+        }
+        
+        .status-disconnected {
+            background-color: #f56565;
+        }
+        
+        .server-config {
+            margin-top: 20px;
+            padding: 15px;
+            background: rgba(26, 31, 41, 0.5);
+            border-radius: 8px;
+        }
+        
+        .server-config h3 {
+            margin-bottom: 10px;
+            color: #a0aec0;
+            font-size: 14px;
+        }
+        
+        .server-input {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .server-input input {
+            flex: 1;
+            padding: 8px 12px;
+            border: 1px solid #2a3343;
+            border-radius: 5px;
+            background-color: #10151e;
+            color: #e6e6e6;
+        }
+        
+        .server-input button {
+            padding: 8px 15px;
+            background: #4d5bce;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- 登录页面 -->
+        <div class="login-container" id="loginPage">
+            <div class="logo">
+                <svg class="impossible-triangle" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M 20,70 L 50,20 L 80,70 Z" fill="none" stroke="#4d5bce" stroke-width="5" />
+                    <path d="M 20,70 L 50,20" fill="none" stroke="#38bdf8" stroke-width="5" />
+                    <path d="M 50,20 L 80,70" fill="none" stroke="#38bdf8" stroke-width="5" />
+                    <path d="M 80,70 L 20,70" fill="none" stroke="#38bdf8" stroke-width="5" />
+                </svg>
+                <h1>Slott-斯洛特</h1>
+            </div>
+            
+            <div class="login-form" id="loginForm">
+                <h2 class="form-title">用户登录</h2>
+                <div class="form-group">
+                    <label for="loginUsername">用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码">
+                </div>
+                <button class="btn" onclick="login()">登录</button>
+                <div class="form-footer">
+                    没有账号？<a id="showRegister">立即注册</a>
+                </div>
+
+                <div class="server-config">
+                    <h3>服务器设置</h3>
+                    <div class="server-input">
+                        <input type="text" id="serverAddress" placeholder="服务器地址" value="ws://localhost:3000">
+                        <button onclick="updateServerAddress()">更新</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="login-form" id="registerForm" style="display: none;">
+                <h2 class="form-title">用户注册</h2>
+                <div class="form-group">
+                    <label for="registerUsername">用户名</label>
+                    <input type="text" id="registerUsername" placeholder="请设置用户名">
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">密码</label>
+                    <input type="password" id="registerPassword" placeholder="请设置密码">
+                </div>
+                <div class="form-group">
+                    <label for="confirmPassword">确认密码</label>
+                    <input type="password" id="confirmPassword" placeholder="请再次输入密码">
+                </div>
+                <button class="btn" onclick="register()">注册</button>
+                <div class="form-footer">
+                    已有账号？<a id="showLogin">立即登录</a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 聊天界面 -->
+        <div class="chat-container" id="chatPage">
+            <div class="chat-header">
+                <div class="chat-title">
+                    <div class="online-dot"></div>
+                    <span>Slott-斯洛特聊天室</span>
+                </div>
+                <div class="chat-actions">
+                    <button title="创建群组" onclick="createGroup()"><i class="fas fa-users"></i></button>
+                    <button title="退出登录" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
+            </div>
+            
+            <div class="chat-main">
+                <div class="sidebar">
+                    <h3 class="sidebar-title">在线用户</h3>
+                    <ul class="user-list" id="userList">
+                        <li class="user-item active">
+                            <div class="user-avatar">G</div>
+                            <span class="user-name">Galahad (站主)</span>
+                        </li>
+                    </ul>
+                    
+                    <h3 class="sidebar-title">我的群组</h3>
+                    <ul class="group-list" id="groupList">
+                        <li class="group-item active">
+                            <div class="group-avatar"><i class="fas fa-users"></i></div>
+                            <span class="group-name">公共聊天室</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="connection-status" id="connectionStatus">
+                        <div class="status-dot status-connected"></div>
+                        <span>已连接</span>
+                    </div>
+                </div>
+                
+                <div class="chat-area">
+                    <div class="messages" id="messages">
+                        <div class="message message-incoming">
+                            <div class="message-sender">系统消息</div>
+                            <div class="message-text">欢迎来到Slott-斯洛特聊天室！</div>
+                            <div class="message-time">刚刚</div>
+                        </div>
+                    </div>
+                    
+                    <div class="message-input">
+                        <input type="text" id="messageInput" placeholder="输入消息..." onkeypress="handleKeyPress(event)">
+                        <button class="send-button" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="notification" id="notification"></div>
+
+    <script>
+        // 配置
+        let serverAddress = localStorage.getItem('slott_server') || 'ws://localhost:3000';
+        document.getElementById('serverAddress').value = serverAddress;
+        
+        // 用户数据存储
+        let users = JSON.parse(localStorage.getItem('slott_users')) || [];
+        // 预设站主账号
+        if (!users.find(u => u.username === 'Galahad')) {
+            users.push({
+                username: 'Galahad',
+                password: '63050861',
+                isAdmin: true
+            });
+            localStorage.setItem('slott_users', JSON.stringify(users));
+        }
+        
+        // 当前用户
+        let currentUser = null;
+        let socket = null;
+        let onlineUsers = {};
+        
+        // DOM元素
+        const loginPage = document.getElementById('loginPage');
+        const chatPage = document.getElementById('chatPage');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const showRegister = document.getElementById('showRegister');
+        const showLogin = document.getElementById('showLogin');
+        const messagesContainer = document.getElementById('messages');
+        const messageInput = document.getElementById('messageInput');
+        const userList = document.getElementById('userList');
+        const groupList = document.getElementById('groupList');
+        const notification = document.getElementById('notification');
+        const connectionStatus = document.getElementById('connectionStatus');
+        
+        // 显示注册表单
+        showRegister.addEventListener('click', () => {
+            loginForm.style.display = 'none';
+            registerForm.style.display = 'block';
+        });
+        
+        // 显示登录表单
+        showLogin.addEventListener('click', () => {
+            registerForm.style.display = 'none';
+            loginForm.style.display = 'block';
+        });
+        
+        // 更新服务器地址
+        function updateServerAddress() {
+            serverAddress = document.getElementById('serverAddress').value;
+            localStorage.setItem('slott_server', serverAddress);
+            showNotification('服务器地址已更新');
+        }
+        
+        // 登录功能
+        function login() {
+            const username = document.getElementById('loginUsername').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                showNotification('请输入用户名和密码', true);
+                return;
+            }
+            
+            const user = users.find(u => u.username === username && u.password === password);
+            
+            if (user) {
+                currentUser = user;
+                showNotification('登录成功！');
+                setTimeout(() => {
+                    loginPage.style.display = 'none';
+                    chatPage.style.display = 'flex';
+                    connectToChatServer();
+                    addSystemMessage(`欢迎 ${username} 加入聊天室！`);
+                }, 1000);
+            } else {
+                showNotification('用户名或密码错误', true);
+            }
+        }
+        
+        // 注册功能
+        function register() {
+            const username = document.getElementById('registerUsername').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!username || !password) {
+                showNotification('请输入用户名和密码', true);
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showNotification('两次输入的密码不一致', true);
+                return;
+            }
+            
+            if (users.find(u => u.username === username)) {
+                showNotification('用户名已存在', true);
+                return;
+            }
+            
+            const newUser = {
+                username,
+                password,
+                isAdmin: false
+            };
+            
+            users.push(newUser);
+            localStorage.setItem('slott_users', JSON.stringify(users));
+            
+            showNotification('注册成功，请登录！');
+            setTimeout(() => {
+                registerForm.style.display = 'none';
+                loginForm.style.display = 'block';
+                document.getElementById('loginUsername').value = username;
+                document.getElementById('loginPassword').value = '';
+            }, 1000);
+        }
+        
+        // 退出登录
+        function logout() {
+            if (socket) {
+                socket.close();
+            }
+            currentUser = null;
+            chatPage.style.display = 'none';
+            loginPage.style.display = 'flex';
+            document.getElementById('loginPassword').value = '';
+        }
+        
+        // 连接到聊天服务器
+        function connectToChatServer() {
+            try {
+                socket = new WebSocket(serverAddress);
+                
+                socket.onopen = function() {
+                    updateConnectionStatus(true);
+                    showNotification('已连接到服务器');
+                    
+                    // 发送加入聊天室消息
+                    socket.send(JSON.stringify({
+                        type: 'join',
+                        user: currentUser.username,
+                        isAdmin: currentUser.isAdmin
+                    }));
+                };
+                
+                socket.onmessage = function(event) {
+                    const data = JSON.parse(event.data);
+                    
+                    switch(data.type) {
+                        case 'user_joined':
+                            addSystemMessage(`${data.user} 加入了聊天室`);
+                            updateOnlineUsers(data.user, true);
+                            break;
+                            
+                        case 'user_left':
+                            addSystemMessage(`${data.user} 离开了聊天室`);
+                            updateOnlineUsers(data.user, false);
+                            break;
+                            
+                        case 'message':
+                            addMessage(data.user, data.text, data.user !== currentUser.username);
+                            break;
+                            
+                        case 'user_list':
+                            updateUserList(data.users);
+                            break;
+                    }
+                };
+                
+                socket.onclose = function() {
+                    updateConnectionStatus(false);
+                    showNotification('与服务器的连接已断开', true);
+                };
+                
+                socket.onerror = function(error) {
+                    console.error('WebSocket错误:', error);
+                    showNotification('连接服务器失败', true);
+                    updateConnectionStatus(false);
+                };
+                
+            } catch (error) {
+                console.error("连接服务器失败:", error);
+                showNotification("连接服务器失败，请检查服务器地址", true);
+                updateConnectionStatus(false);
+            }
+        }
+        
+        // 发送消息
+        function sendMessage() {
+            const text = messageInput.value.trim();
+            if (!text) return;
+            
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                const message = {
+                    type: 'message',
+                    user: currentUser.username,
+                    text: text,
+                    timestamp: new Date().toISOString()
+                };
+                socket.send(JSON.stringify(message));
+                
+                // 添加到自己的消息列表
+                addMessage(currentUser.username, text, true);
+            } else {
+                showNotification('未连接到服务器', true);
+            }
+            
+            messageInput.value = '';
+        }
+        
+        // 添加消息到聊天窗口
+        function addMessage(sender, text, isIncoming) {
+            const messageDiv = document.createElement('div');
+            
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isIncoming ? 'message-incoming' : 'message-outgoing');
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            messageDiv.innerHTML = `
+                ${isIncoming ? `<div class="message-sender">${sender}</div>` : ''}
+                <div class="message-text">${text}</div>
+                <div class="message-time">${timeString}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // 添加系统消息
+        function addSystemMessage(text) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message', 'message-incoming');
+            
+            const now = new Date();
+            const timeString = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            messageDiv.innerHTML = `
+                <div class="message-sender">系统消息</div>
+                <div class="message-text">${text}</div>
+                <div class="message-time">${timeString}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+        
+        // 创建群组
+        function createGroup() {
+            if (!currentUser.isAdmin) {
+                showNotification('只有站主可以创建群组', true);
+                return;
+            }
+            
+            const groupName = prompt('请输入群组名称：');
+            if (groupName) {
+                const groupItem = document.createElement('li');
+                groupItem.classList.add('group-item');
+                groupItem.innerHTML = `
+                    <div class="group-avatar"><i class="fas fa-users"></i></div>
+                    <span class="group-name">${groupName}</span>
+                `;
+                groupList.appendChild(groupItem);
+                showNotification(`群组 "${groupName}" 创建成功！`);
+            }
+        }
+        
+        // 更新在线用户列表
+        function updateOnlineUsers(username, isOnline) {
+            if (isOnline) {
+                onlineUsers[username] = true;
+                
+                // 如果用户不在列表中，添加到列表
+                if (!document.querySelector(`.user-item .user-name[data-user="${username}"]`)) {
+                    const userItem = document.createElement('li');
+                    userItem.classList.add('user-item');
+                    userItem.innerHTML = `
+                        <div class="user-avatar">${username[0]}</div>
+                        <span class="user-name" data-user="${username}">${username}</span>
+                    `;
+                    userList.appendChild(userItem);
+                }
+            } else {
+                delete onlineUsers[username];
+                // 从列表中移除用户
+                const userElement = document.querySelector(`.user-item .user-name[data-user="${username}"]`);
+                if (userElement) {
+                    userElement.closest('.user-item').remove();
+                }
+            }
+        }
+        
+        // 更新用户列表
+        function updateUserList(users) {
+            // 清空当前列表（除了站主）
+            const items = userList.querySelectorAll('.user-item');
+            items.forEach(item => {
+                if (!item.querySelector('.user-name').textContent.includes('Galahad')) {
+                    item.remove();
+                }
+            });
+            
+            // 添加新用户
+            users.forEach(user => {
+                if (user !== 'Galahad') {
+                    const userItem = document.createElement('li');
+                    userItem.classList.add('user-item');
+                    userItem.innerHTML = `
+                        <div class="user-avatar">${user[0]}</div>
+                        <span class="user-name" data-user="${user}">${user}</span>
+                    `;
+                    userList.appendChild(userItem);
+                }
+            });
+        }
+        
+        // 更新连接状态
+        function updateConnectionStatus(connected) {
+            const statusDot = connectionStatus.querySelector('.status-dot');
+            const statusText = connectionStatus.querySelector('span');
+            
+            if (connected) {
+                statusDot.className = 'status-dot status-connected';
+                statusText.textContent = '已连接';
+            } else {
+                statusDot.className = 'status-dot status-disconnected';
+                statusText.textContent = '已断开';
+            }
+        }
+        
+        // 显示通知
+        function showNotification(text, isError = false) {
+            notification.textContent = text;
+            notification.classList.toggle('error', isError);
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // 按Enter发送消息
+        function handleKeyPress(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // 初始化用户列表
+        function initUserList() {
+            users.forEach(user => {
+                if (user.username !== 'Galahad') {
+                    const userItem = document.createElement('li');
+                    userItem.classList.add('user-item');
+                    userItem.innerHTML = `
+                        <div class="user-avatar">${user.username[0]}</div>
+                        <span class="user-name" data-user="${user.username}">${user.username}</span>
+                    `;
+                    userList.appendChild(userItem);
+                }
+            });
+        }
+        
+        // 页面加载时初始化
+        window.onload = initUserList;
+    </script>
+</body>
+</html>
